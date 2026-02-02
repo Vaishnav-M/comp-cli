@@ -27,9 +27,9 @@ TABLE OF CONTENTS
 
 Project Name: comp-cli
 Type: Section-based UI Component Registry with CLI Installer
-Author: [Your Name]
+Author: Vaishnav M
 Date: February 2026
-Repository: https://github.com/[username]/comp-cli
+Repository: https://github.com/Vaishnav-M/comp-cli
 
 This project implements a reusable section-based UI component registry along 
 with a CLI installer tool, designed to work seamlessly with both Next.js and 
@@ -432,7 +432,7 @@ Props:
 7.1 Quick Test (5 minutes)
 --------------------------
 1. Clone the repository:
-   git clone https://github.com/[username]/comp-cli.git
+   git clone https://github.com/Vaishnav-M/comp-cli.git
    cd comp-cli
 
 2. Install and build:
@@ -560,4 +560,4 @@ C. Verify Component Features:
 
 For questions or support, please open an issue on the GitHub repository.
 
-GitHub: https://github.com/[username]/comp-cli
+GitHub: https://github.com/Vaishnav-M/comp-cli
