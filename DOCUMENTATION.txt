@@ -1,0 +1,563 @@
+================================================================================
+                    COMP-CLI: SECTION-BASED UI COMPONENT REGISTRY
+                         Technical Documentation & User Guide
+================================================================================
+                              Frontend Technical Assessment
+                                    February 2026
+================================================================================
+
+
+TABLE OF CONTENTS
+================================================================================
+1. Executive Summary
+2. Project Overview
+3. Architecture & Design Decisions
+4. Installation & Setup
+5. CLI Commands Reference
+6. Component Documentation
+7. Testing Instructions for Reviewers
+8. Technical Specifications
+9. Future Enhancements
+================================================================================
+
+
+================================================================================
+1. EXECUTIVE SUMMARY
+================================================================================
+
+Project Name: comp-cli
+Type: Section-based UI Component Registry with CLI Installer
+Author: [Your Name]
+Date: February 2026
+Repository: https://github.com/[username]/comp-cli
+
+This project implements a reusable section-based UI component registry along 
+with a CLI installer tool, designed to work seamlessly with both Next.js and 
+plain React+TypeScript projects.
+
+Key Deliverables:
+- 5 mandatory sections (Hero, About, Contact, Booking, Footer)
+- Each section has 2-3 layout variants
+- CLI tool with init, add, and list commands
+- Full TypeScript support with strict typing
+- Zero runtime dependencies (components copied to project)
+
+
+================================================================================
+2. PROJECT OVERVIEW
+================================================================================
+
+2.1 Problem Statement
+---------------------
+Modern web development often requires building landing pages with common 
+sections. Developers repeatedly implement similar components like hero banners,
+contact forms, and footers. This project provides a solution by offering:
+
+- Pre-built, production-ready section components
+- Easy installation via CLI
+- Full customization through source code ownership
+- Consistent design patterns across projects
+
+2.2 Solution Architecture
+-------------------------
+The project follows a monorepo structure with npm workspaces:
+
+comp-cli/
+├── packages/
+│   ├── cli/           # CLI tool (published as comp-cli)
+│   │   ├── src/
+│   │   │   ├── commands/     # CLI commands (init, add)
+│   │   │   ├── templates/    # Embedded component templates
+│   │   │   └── bin/          # CLI entry point
+│   │   └── package.json
+│   │
+│   └── registry/      # Component source (development reference)
+│       └── src/
+│           ├── hero/
+│           ├── about/
+│           ├── contact/
+│           ├── booking/
+│           └── footer/
+│
+├── package.json       # Workspace root
+├── comp-cli.json      # CLI configuration schema
+└── README.md
+
+2.3 Design Philosophy
+---------------------
+- Copy, Don't Import: Components are copied into the user's project, giving
+  full ownership and customization ability
+- TypeScript First: All components are fully typed with strict mode
+- Framework Agnostic: Works with Next.js (App/Pages) and plain React
+- Accessible by Default: WCAG-compliant with proper ARIA attributes
+- Theme Support: Built-in light/dark mode support
+
+
+================================================================================
+3. ARCHITECTURE & DESIGN DECISIONS
+================================================================================
+
+3.1 Why Embedded Templates?
+---------------------------
+Rather than fetching components from a remote registry, templates are embedded
+directly in the CLI package. This provides:
+
+- Offline capability
+- Faster installation
+- Version consistency
+- No external dependencies
+
+3.2 Component Structure
+-----------------------
+Each section follows a consistent pattern:
+
+[Section]/
+├── index.ts           # Public exports
+├── [Section].base.tsx # Base component, types, shared utilities
+└── [Section].variants.tsx # Variant implementations
+
+This separation allows:
+- Clean public API through index.ts
+- Shared logic in base file
+- Independent variant implementations
+- Easy addition of new variants
+
+3.3 Shared Utilities
+--------------------
+Common functionality is extracted into shared modules:
+
+- types/index.ts: Common TypeScript interfaces
+- utils/index.ts: Utility functions (cn, formatPhone, etc.)
+- utils/validation.ts: Form validation utilities
+- hooks/index.ts: Custom React hooks (useTheme, useForm, useId)
+- styles/index.ts: Theme colors and style utilities
+- components/primitives.tsx: Reusable UI primitives (Button, Input, etc.)
+
+3.4 Variant System
+------------------
+Each section supports multiple variants through a discriminated union pattern:
+
+type HeroVariant = 'centered' | 'split' | 'fullwidth';
+
+const variantComponents = {
+  centered: HeroCentered,
+  split: HeroSplit,
+  fullwidth: HeroFullwidth,
+};
+
+export function Hero({ variant, ...props }) {
+  const Component = variantComponents[variant];
+  return <Component {...props} />;
+}
+
+
+================================================================================
+4. INSTALLATION & SETUP
+================================================================================
+
+4.1 For End Users (Using the CLI)
+---------------------------------
+Step 1: Navigate to your React or Next.js project
+
+  cd your-project
+
+Step 2: Initialize the component registry
+
+  npx comp-cli init
+
+  This will:
+  - Detect your project type (Next.js App/Pages or React)
+  - Create comp-cli.json configuration
+  - Install shared utilities (types, hooks, styles, etc.)
+
+Step 3: Add sections
+
+  # Add individual sections
+  npx comp-cli add hero
+  npx comp-cli add contact footer
+
+  # Or add all sections at once
+  npx comp-cli add --all
+
+Step 4: Use components in your code
+
+  import { Hero } from '@/components/sections/hero';
+  
+  <Hero
+    variant="centered"
+    theme="light"
+    content={{
+      heading: 'Welcome',
+      subheading: 'Get started today',
+    }}
+  />
+
+4.2 For Developers (Building from Source)
+-----------------------------------------
+Step 1: Clone the repository
+
+  git clone https://github.com/[username]/comp-cli.git
+  cd comp-cli
+
+Step 2: Install dependencies
+
+  npm install
+
+Step 3: Build the CLI
+
+  npm run build
+
+Step 4: Link for local testing
+
+  cd packages/cli
+  npm link
+
+
+================================================================================
+5. CLI COMMANDS REFERENCE
+================================================================================
+
+5.1 comp-cli init
+-----------------
+Initializes the component registry in your project.
+
+Usage:
+  npx comp-cli init [options]
+
+Options:
+  -y, --yes     Skip prompts and use defaults
+  -h, --help    Display help
+
+Behavior:
+- Detects project type (nextjs-app, nextjs-pages, react)
+- Creates comp-cli.json configuration file
+- Installs shared utilities to configured path
+- Sets up TypeScript path aliases if needed
+
+Example:
+  npx comp-cli init -y
+
+5.2 comp-cli add <sections...>
+------------------------------
+Adds one or more sections to your project.
+
+Usage:
+  npx comp-cli add [sections...] [options]
+
+Arguments:
+  sections    Section names: hero, about, contact, booking, footer
+
+Options:
+  -a, --all   Add all available sections
+  -h, --help  Display help
+
+Examples:
+  npx comp-cli add hero
+  npx comp-cli add hero about footer
+  npx comp-cli add --all
+
+5.3 comp-cli list
+-----------------
+Lists all available sections and their variants.
+
+Usage:
+  npx comp-cli list
+
+Output:
+  Available sections:
+  
+  hero
+    Variants: centered, split, fullwidth
+  
+  about
+    Variants: text-heavy, image-focused, values
+  
+  contact
+    Variants: simple, with-info, cta-based
+  
+  booking
+    Variants: minimal, datetime, with-info
+  
+  footer
+    Variants: minimal, multi-column, newsletter
+
+
+================================================================================
+6. COMPONENT DOCUMENTATION
+================================================================================
+
+6.1 Hero Section
+----------------
+A prominent banner section for page headers.
+
+Variants:
+  - centered: Content centered with optional background
+  - split: Two-column layout with media on one side
+  - fullwidth: Full-screen with background image/video
+
+Props:
+  interface HeroProps {
+    variant: 'centered' | 'split' | 'fullwidth';
+    theme?: 'light' | 'dark';
+    content: {
+      heading: string;
+      subheading?: string;
+      description?: string;
+      ctas?: CTAButton[];
+    };
+    media?: {
+      src: string;
+      alt: string;
+      type?: 'image' | 'video';
+    };
+    alignment?: 'left' | 'center' | 'right';
+    minHeight?: string;
+    className?: string;
+    id?: string;
+  }
+
+Usage Example:
+  <Hero
+    variant="split"
+    theme="light"
+    content={{
+      heading: 'Build Something Amazing',
+      subheading: 'Start your journey today',
+      ctas: [
+        { label: 'Get Started', href: '/start', variant: 'primary' },
+        { label: 'Learn More', href: '/docs', variant: 'outline' },
+      ],
+    }}
+    media={{
+      src: '/hero-image.jpg',
+      alt: 'Product showcase',
+    }}
+  />
+
+6.2 About Section
+-----------------
+Company/product information with various layouts.
+
+Variants:
+  - text-heavy: Long-form content focused
+  - image-focused: Image-prominent with description
+  - values: Grid of highlights/values
+
+Props:
+  interface AboutProps {
+    variant: 'text-heavy' | 'image-focused' | 'values';
+    theme?: 'light' | 'dark';
+    content: {
+      heading: string;
+      subheading?: string;
+      description: string | string[];
+      highlights?: HighlightItem[];
+    };
+    media?: MediaItem;
+    mediaPosition?: 'left' | 'right';
+  }
+
+6.3 Contact Section
+-------------------
+Contact forms with various information displays.
+
+Variants:
+  - simple: Basic contact form
+  - with-info: Form plus contact information sidebar
+  - cta-based: Prominent CTAs with minimal form
+
+Props:
+  interface ContactProps {
+    variant: 'simple' | 'with-info' | 'cta-based';
+    theme?: 'light' | 'dark';
+    content: {
+      heading: string;
+      description?: string;
+      email?: string;
+      phone?: string;
+      address?: string;
+    };
+    onSubmit?: (data: ContactFormData) => void | Promise<void>;
+  }
+
+6.4 Booking Section
+-------------------
+Appointment/reservation booking forms.
+
+Variants:
+  - minimal: Simple service selection form
+  - datetime: Date and time picker focused
+  - with-info: Form plus business information
+
+Props:
+  interface BookingProps {
+    variant: 'minimal' | 'datetime' | 'with-info';
+    theme?: 'light' | 'dark';
+    content: {
+      heading: string;
+      description?: string;
+      services?: ServiceItem[];
+    };
+    onSubmit?: (data: BookingFormData) => void | Promise<void>;
+  }
+
+6.5 Footer Section
+------------------
+Page footer with branding and navigation.
+
+Variants:
+  - minimal: Simple branding and links
+  - multi-column: Multiple navigation columns
+  - newsletter: Includes email subscription
+
+Props:
+  interface FooterProps {
+    variant: 'minimal' | 'multi-column' | 'newsletter';
+    theme?: 'light' | 'dark';
+    content: {
+      branding: { logo?: string; name: string; tagline?: string };
+      navGroups?: NavGroup[];
+      links?: NavLink[];
+      socialLinks?: SocialLink[];
+      copyright?: string;
+      newsletter?: NewsletterConfig;
+    };
+  }
+
+
+================================================================================
+7. TESTING INSTRUCTIONS FOR REVIEWERS
+================================================================================
+
+7.1 Quick Test (5 minutes)
+--------------------------
+1. Clone the repository:
+   git clone https://github.com/[username]/comp-cli.git
+   cd comp-cli
+
+2. Install and build:
+   npm install
+   npm run build
+
+3. Link the CLI globally:
+   cd packages/cli
+   npm link
+   cd ../..
+
+4. Create a test Next.js project:
+   npx create-next-app@latest test-project --typescript --app
+   cd test-project
+
+5. Test the CLI:
+   comp-cli init -y
+   comp-cli add --all
+
+6. Verify TypeScript:
+   npx tsc --noEmit
+
+7. Run the project:
+   npm run dev
+   # Open http://localhost:3000
+
+7.2 Full Test (15 minutes)
+--------------------------
+A. Test with Next.js App Router:
+   - Follow steps in 7.1
+   - Create a test page using all components
+   - Verify all variants render correctly
+
+B. Test with Plain React (Vite):
+   npm create vite@latest test-react -- --template react-ts
+   cd test-react
+   npm install
+   comp-cli init -y
+   comp-cli add --all
+   npx tsc --noEmit
+   npm run dev
+
+C. Verify Component Features:
+   - Light/dark theme switching
+   - Form validation
+   - Responsive layouts
+   - Accessibility (keyboard navigation)
+
+7.3 Expected Results
+--------------------
+✓ comp-cli init detects project type correctly
+✓ comp-cli add installs sections with all dependencies
+✓ TypeScript compilation passes with 0 errors
+✓ All components render without runtime errors
+✓ Forms are functional with validation
+✓ Themes apply correctly
+
+
+================================================================================
+8. TECHNICAL SPECIFICATIONS
+================================================================================
+
+8.1 Technology Stack
+--------------------
+- Language: TypeScript 5.3+
+- Runtime: Node.js 18+
+- Package Manager: npm with workspaces
+- Build Tool: tsc (TypeScript compiler)
+
+8.2 CLI Dependencies
+--------------------
+- commander: CLI framework
+- chalk: Terminal styling
+- ora: Loading spinners
+- prompts: Interactive prompts
+- fs-extra: Enhanced file system operations
+
+8.3 Component Dependencies
+--------------------------
+- React 18+ (peer dependency)
+- No additional runtime dependencies
+
+8.4 Browser Support
+-------------------
+- Chrome 90+
+- Firefox 90+
+- Safari 14+
+- Edge 90+
+
+8.5 Accessibility Compliance
+----------------------------
+- WCAG 2.1 Level AA
+- Semantic HTML structure
+- ARIA labels and roles
+- Keyboard navigation support
+- Focus management
+- Screen reader compatible
+
+
+================================================================================
+9. FUTURE ENHANCEMENTS
+================================================================================
+
+9.1 Planned Features
+--------------------
+- [ ] Additional section types (Testimonials, Pricing, FAQ)
+- [ ] More variants per section
+- [ ] Tailwind CSS integration option
+- [ ] CSS-in-JS support (styled-components, emotion)
+- [ ] Animation presets
+- [ ] CMS integration helpers
+
+9.2 Potential Improvements
+--------------------------
+- Remote registry option for updates
+- Visual documentation site
+- Storybook integration
+- Testing utilities
+- Migration tools for version updates
+
+
+================================================================================
+                              END OF DOCUMENTATION
+================================================================================
+
+For questions or support, please open an issue on the GitHub repository.
+
+GitHub: https://github.com/[username]/comp-cli

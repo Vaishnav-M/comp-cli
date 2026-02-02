@@ -1,0 +1,5 @@
+{
+  "$schema": "https://raw.githubusercontent.com/comp-cli/schema.json",
+  "componentsDir": "src/components/sections",
+  "installedSections": []
+}

@@ -1,0 +1,67 @@
+{
+  "name": "@comp-cli/registry",
+  "version": "1.0.0",
+  "description": "Section-based UI component registry",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./hero": {
+      "import": "./dist/hero/index.mjs",
+      "require": "./dist/hero/index.js",
+      "types": "./dist/hero/index.d.ts"
+    },
+    "./about": {
+      "import": "./dist/about/index.mjs",
+      "require": "./dist/about/index.js",
+      "types": "./dist/about/index.d.ts"
+    },
+    "./contact": {
+      "import": "./dist/contact/index.mjs",
+      "require": "./dist/contact/index.js",
+      "types": "./dist/contact/index.d.ts"
+    },
+    "./booking": {
+      "import": "./dist/booking/index.mjs",
+      "require": "./dist/booking/index.js",
+      "types": "./dist/booking/index.d.ts"
+    },
+    "./footer": {
+      "import": "./dist/footer/index.mjs",
+      "require": "./dist/footer/index.js",
+      "types": "./dist/footer/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "typescript": "^5.3.3"
+  },
+  "keywords": [
+    "react",
+    "components",
+    "ui",
+    "sections",
+    "registry",
+    "nextjs"
+  ],
+  "license": "MIT"
+}

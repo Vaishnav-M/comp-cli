@@ -1,0 +1,26 @@
+{
+  "name": "comp-cli-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Section-based UI component registry with CLI installer",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "build:registry": "npm run build --workspace=@comp-cli/registry",
+    "build:cli": "npm run build --workspace=comp-cli",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf packages/*/dist"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
